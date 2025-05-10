@@ -1,0 +1,1 @@
+ALTER TABLE `endpoints` ADD `template_engine` text DEFAULT 'simple' NOT NULL;

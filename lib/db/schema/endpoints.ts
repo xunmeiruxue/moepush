@@ -4,6 +4,7 @@ import { createInsertSchema, createSelectSchema } from "drizzle-zod"
 import { relations } from "drizzle-orm"
 import { z } from "zod"
 import { channels } from "./channels"
+import { TemplateEngineType } from "@/lib/template"
 
 export const endpoints = sqliteTable("endpoints", {
   id: text("id").primaryKey(),
@@ -13,6 +14,7 @@ export const endpoints = sqliteTable("endpoints", {
   channelId: text("channel_id").notNull(),
   createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
   rule: text("rule").notNull(),
+  templateEngine: text("template_engine").notNull().default(TemplateEngineType.SIMPLE),
 }, (table) => ({
   userIdIdx: index("endpoints_user_id_idx").on(table.userId),
   channelIdIdx: index("endpoints_channel_id_idx").on(table.channelId),
@@ -31,9 +33,10 @@ export const insertEndpointSchema = createInsertSchema(endpoints).extend({
   id: z.string().optional(),
   channelId: z.string().min(1, "请选择推送渠道"),
   rule: z.string().min(1, "消息模版不能为空"),
+  templateEngine: z.nativeEnum(TemplateEngineType).default(TemplateEngineType.SIMPLE),
 })
 
 export const selectEndpointSchema = createSelectSchema(endpoints)
 
-export type Endpoint = typeof endpoints.$inferSelect
+export type Endpoint = z.infer<typeof selectEndpointSchema>
 export type NewEndpoint = z.infer<typeof insertEndpointSchema> 

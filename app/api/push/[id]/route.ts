@@ -2,7 +2,7 @@ import { NextRequest } from "next/server"
 import { getDb } from "@/lib/db"
 import { endpoints } from "@/lib/db/schema/endpoints"
 import { eq } from "drizzle-orm"
-import { safeInterpolate } from "@/lib/template"
+import { safeInterpolate, TemplateEngineType } from "@/lib/template"
 import { sendChannelMessage } from "@/lib/channels"
 
 export const runtime = "edge"
@@ -33,9 +33,14 @@ export async function POST(
     const body = await request.json()
     console.log('body:', body)
 
-    const processedTemplate = safeInterpolate(endpoint.rule, {
+    // 兼容模板引擎类型变更
+    const engineType = endpoint.templateEngine === 'es2023' 
+      ? TemplateEngineType.ADVANCED 
+      : endpoint.templateEngine as TemplateEngineType
+
+    const processedTemplate = await safeInterpolate(endpoint.rule, {
       body,
-    })
+    }, '', engineType)
 
     const messageObj = JSON.parse(processedTemplate)
 

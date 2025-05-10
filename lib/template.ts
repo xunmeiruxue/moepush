@@ -1,3 +1,7 @@
+import { newQuickJSWASMModule, DEBUG_SYNC as baseVariant, newVariant } from "quickjs-emscripten"
+//@ts-expect-error "ignore"
+import cloudflareWasmModule from "../RELEASE_SYNC.wasm?module"
+
 // 内置函数定义
 const BUILT_IN_FUNCTIONS = {
   // 截断字符串,超过maxLength的部分用...替代
@@ -45,17 +49,25 @@ const BUILT_IN_FUNCTIONS = {
 
 type BuiltInFunction = keyof typeof BUILT_IN_FUNCTIONS
 
-// 函数调用正则表达式
 const FUNCTION_CALL_REGEX = /\${(\w+)\((.*?)\)}/g
-// 变量替换正则表达式
 const VARIABLE_REGEX = /\${([\w.]+)}/g
 
-export function safeInterpolate(
+export enum TemplateEngineType {
+  SIMPLE = 'simple', 
+  ADVANCED = 'advanced'  
+}
+
+export async function safeInterpolate(
     template: string,
     data: Record<string, any>,
-    fallback = ''
-): string {
-    console.log('safeInterpolate template:', template)
+    fallback = '',
+    engineType: TemplateEngineType = TemplateEngineType.SIMPLE
+): Promise<string> {
+    console.log('safeInterpolate template:', template, 'engineType:', engineType)
+    
+    if (engineType === TemplateEngineType.ADVANCED) {
+      return interpolateWithQuickJS(template, data, fallback)
+    }
     
     // 先处理函数调用
     let result = template.replace(FUNCTION_CALL_REGEX, (_, fnName, argsStr) => {
@@ -120,5 +132,66 @@ export function safeInterpolate(
 
     console.log('safeInterpolate result:', result)
     return result
+}
+
+
+async function interpolateWithQuickJS(
+  template: string,
+  data: Record<string, any>,
+  fallback = ''
+): Promise<string> {
+  try {
+    const cloudflareVariant = newVariant(baseVariant, {
+      wasmModule: cloudflareWasmModule,
+    })
+      
+    const QuickJS = await newQuickJSWASMModule(cloudflareVariant)
+    
+    const vm = QuickJS.newContext()
+
+    const truncateHandle = vm.newFunction('truncate', (...args: any[]) => {
+      const nativeArgs = args.map(vm.dump)
+      const result = BUILT_IN_FUNCTIONS.truncate(nativeArgs[0], nativeArgs[1])
+      return vm.newString(result)
+    })
+
+    const nowHandle = vm.newFunction('now', (...args: any[]) => {
+      const nativeArgs = args.map(vm.dump)
+      const result = BUILT_IN_FUNCTIONS.now(nativeArgs[0], nativeArgs[1])
+      return vm.newString(result)
+    })
+
+    vm.setProp(vm.global, 'truncate', truncateHandle)
+    vm.setProp(vm.global, 'now', nowHandle)
+
+    truncateHandle.dispose()
+    nowHandle.dispose()
+
+    const dataStr = JSON.stringify(data)
+
+    const code = `
+      let body = {};
+      try { body = JSON.parse(${dataStr}) } catch (e) { {} };
+      \`${template}\`;
+    `
+    
+    const result = vm.evalCode(code)
+
+    if (result.error) {
+      console.error('QuickJS执行错误:', result.error.toString())
+      return fallback
+    }
+    
+    const resultString = result.value.toString()
+
+    result.value.dispose()
+    vm.dispose()
+    
+    console.log('QuickJS template result:', resultString)
+    return resultString
+  } catch (error) {
+    console.error('QuickJS模板执行错误:', error)
+    return fallback
+  }
 }
 

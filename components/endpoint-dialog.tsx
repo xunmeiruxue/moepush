@@ -38,6 +38,7 @@ import { Channel, ChannelType } from "@/lib/channels"
 import { CHANNEL_TEMPLATES } from "@/lib/channels"
 import { TemplateFields } from "@/components/template-fields"
 import { createEndpoint, updateEndpoint } from "@/lib/services/endpoints"
+import { TemplateEngineType } from "@/lib/template"
 
 interface EndpointDialogProps {
   mode?: "create" | "edit"
@@ -85,6 +86,7 @@ export function EndpointDialog({
       name: endpoint?.name ?? "",
       channelId: endpoint?.channelId ?? "",
       rule: endpoint?.rule ?? "",
+      templateEngine: (endpoint?.templateEngine as TemplateEngineType) ?? TemplateEngineType.SIMPLE,
     },
   })
 
@@ -194,6 +196,43 @@ export function EndpointDialog({
                   )}
                 />
               </div>
+
+              <FormField
+                control={form.control}
+                name="templateEngine"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      模板引擎
+                    </FormLabel>
+                    <Select 
+                      onValueChange={field.onChange}
+                      value={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="选择模板引擎" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value={TemplateEngineType.SIMPLE}>
+                          简易模板（推荐）
+                        </SelectItem>
+                        <SelectItem value={TemplateEngineType.ADVANCED}>
+                          高级模板（支持JavaScript语法）
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {field.value === TemplateEngineType.SIMPLE ? 
+                        "简易模板：简单的变量替换和内置函数支持，推荐大多数场景使用" : 
+                        "高级模板：支持完整的 JavaScript 语法，可编写复杂逻辑"}
+                    </p>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
               <FormField
                 control={form.control}
                 name="rule"
