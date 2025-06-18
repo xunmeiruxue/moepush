@@ -62,6 +62,7 @@ export function ChannelDialog({ mode = "create", channel }: ChannelDialogProps) 
       agentId: channel?.agentId || "",
       botToken: channel?.botToken || "",
       chatId: channel?.chatId || "",
+      threadId: channel?.threadId || "",
     },
   })
 
@@ -190,4 +191,4 @@ export function ChannelDialog({ mode = "create", channel }: ChannelDialogProps) 
       </DialogContent>
     </Dialog>
   )
-} 
+}

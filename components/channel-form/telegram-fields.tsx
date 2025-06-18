@@ -143,6 +143,27 @@ export function TelegramFields({ form }: TelegramFieldsProps) {
           </FormItem>
         )}
       />
+      <FormField
+        control={form.control}
+        name="threadId"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>
+              话题 ID (可选)
+            </FormLabel>
+            <FormControl>
+              <Input
+                placeholder="请输入话题ID (仅限超级群组)"
+                {...field}
+              />
+            </FormControl>
+            <FormDescription>
+              唯一标识符，用以向该标识符对应的话题发送消息。
+            </FormDescription>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
     </>
   )
-} 
+}

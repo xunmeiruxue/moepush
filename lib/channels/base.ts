@@ -28,6 +28,7 @@ export interface SendMessageOptions {
   agentId?: string
   botToken?: string
   chatId?: string
+  threadId?: string
   [key: string]: any
 }
 
@@ -47,4 +48,4 @@ export abstract class BaseChannel {
   getType(): string {
     return this.config.type
   }
-} 
+}

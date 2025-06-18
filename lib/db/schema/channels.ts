@@ -14,6 +14,7 @@ export const channels = sqliteTable("channels", {
   agentId: text("agent_id"),
   botToken: text("bot_token"),
   chatId: text("chat_id"),
+  threadId: text("thread_id"), // 用于存储 Telegram 话题 ID
   status: text("status", { enum: ["active", "inactive"] }).notNull().default("active"),
   userId: text("user_id").notNull(),
   createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
@@ -32,6 +33,7 @@ export const insertChannelSchema = createInsertSchema(channels).extend({
   id: z.string().optional(),
   botToken: z.string().optional(),
   chatId: z.string().optional(),
+  threadId: z.string().optional(),
 }).refine((data) => {
   if (data.type === CHANNEL_TYPES.WECOM_APP) {
     return !!data.corpId
@@ -133,4 +135,4 @@ export const insertChannelSchema = createInsertSchema(channels).extend({
 export const selectChannelSchema = createSelectSchema(channels)
 
 export type Channel = typeof channels.$inferSelect
-export type ChannelFormData = z.infer<typeof insertChannelSchema> 
+export type ChannelFormData = z.infer<typeof insertChannelSchema>

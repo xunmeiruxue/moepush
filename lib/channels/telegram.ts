@@ -6,6 +6,7 @@ interface TelegramMessage {
   parse_mode?: "HTML" | "Markdown" | "MarkdownV2"
   disable_web_page_preview?: boolean
   disable_notification?: boolean
+  message_thread_id?: string // 话题ID
 }
 
 export class TelegramChannel extends BaseChannel {
@@ -53,13 +54,22 @@ export class TelegramChannel extends BaseChannel {
     message: TelegramMessage,
     options: SendMessageOptions
   ): Promise<Response> {
-    const { botToken, chatId } = options
+    const { botToken, chatId, threadId } = options
     
     if (!botToken || !chatId) {
       throw new Error("缺少 Bot Token 或 Chat ID")
     }
     
     console.log('sendTelegramMessage message:', message)
+
+    const payload: TelegramMessage = {
+      ...message,
+      chat_id: chatId,
+    };
+
+    if (threadId) {
+      payload.message_thread_id = threadId;
+    }
 
     const response = await fetch(
       `https://api.telegram.org/bot${botToken}/sendMessage`,
@@ -68,10 +78,7 @@ export class TelegramChannel extends BaseChannel {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          ...message,
-          chat_id: chatId,
-        }),
+        body: JSON.stringify(payload),
       }
     )
 
@@ -82,4 +89,4 @@ export class TelegramChannel extends BaseChannel {
 
     return response
   }
-} 
+}

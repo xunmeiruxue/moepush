@@ -49,6 +49,7 @@ export async function POST(
         agentId: endpoint.channel.agentId,
         botToken: endpoint.channel.botToken,
         chatId: endpoint.channel.chatId,
+        threadId: endpoint.channel.threadId,
       }
     )
 
@@ -61,4 +62,4 @@ export async function POST(
       { status: 500 }
     )
   }
-} 
+}
