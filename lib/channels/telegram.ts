@@ -21,6 +21,8 @@ export class TelegramChannel extends BaseChannel {
         fields: [
           { key: "text", description: "HTML内容", required: true, component: 'textarea' },
           { key: "disable_notification", description: "静默发送", component: 'checkbox' },
+          { key: "chat_id", description: "会话 ID (可选，用于覆盖渠道设置)", component: 'input' },
+          { key: "message_thread_id", description: "话题 ID (可选，用于覆盖渠道设置)", component: 'input' },
           { key: "parse_mode", component: 'hidden', defaultValue: "HTML" },
         ],
       },
@@ -40,6 +42,8 @@ export class TelegramChannel extends BaseChannel {
             description: "静默发送",
             component: 'checkbox'
           },
+          { key: "chat_id", description: "会话 ID (可选，用于覆盖渠道设置)", component: 'input' },
+          { key: "message_thread_id", description: "话题 ID (可选，用于覆盖渠道设置)", component: 'input' },
           {
             key: "parse_mode",
             component: 'hidden',
@@ -54,21 +58,33 @@ export class TelegramChannel extends BaseChannel {
     message: TelegramMessage,
     options: SendMessageOptions
   ): Promise<Response> {
-    const { botToken, chatId, threadId } = options
+    const { botToken } = options
     
-    if (!botToken || !chatId) {
-      throw new Error("缺少 Bot Token 或 Chat ID")
+    if (!botToken) {
+      throw new Error("缺少 Bot Token")
     }
     
+    // 优先使用接口规则中定义的 chat_id，如果未定义，则回退到渠道设置中的 chatId
+    const finalChatId = message.chat_id || options.chatId;
+    if (!finalChatId) {
+      throw new Error("缺少 Chat ID");
+    }
+
+    // 优先使用接口规则中定义的 message_thread_id，如果未定义，则回退到渠道设置中的 threadId
+    const finalThreadId = message.message_thread_id || options.threadId;
+
     console.log('sendTelegramMessage message:', message)
 
     const payload: TelegramMessage = {
       ...message,
-      chat_id: chatId,
+      chat_id: finalChatId,
     };
-
-    if (threadId) {
-      payload.message_thread_id = threadId;
+    
+    if (finalThreadId) {
+        payload.message_thread_id = finalThreadId;
+    } else {
+        // 确保如果接口中没有提供，也不会发送一个空的 message_thread_id
+        delete (payload as Partial<TelegramMessage>).message_thread_id;
     }
 
     const response = await fetch(
