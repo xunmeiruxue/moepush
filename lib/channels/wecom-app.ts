@@ -52,16 +52,19 @@ export class WecomAppChannel extends BaseChannel {
     message: WecomAppMessage,
     options: SendMessageOptions
   ): Promise<Response> {
-    const { corpId, agentId, secret } = options
+    const { corpId, agentId, secret, apiBaseUrl } = options
     
     if (!corpId || !agentId || !secret) {
       throw new Error("缺少必要的配置信息")
     }
     
+    // 使用自定义 API 地址或默认的官方地址
+    const baseUrl = apiBaseUrl || "qyapi.weixin.qq.com"
+    
     console.log('sendWecomAppMessage message:', message)
 
     const tokenResponse = await fetch(
-      `https://wxapiproxy-latest-dhyi.onrender.com/cgi-bin/gettoken?corpid=${corpId}&corpsecret=${secret}`
+      `https://${baseUrl}/cgi-bin/gettoken?corpid=${corpId}&corpsecret=${secret}`
     )
     const tokenData = await tokenResponse.json() as { access_token: string, errcode: number, errmsg: string }
     
@@ -70,7 +73,7 @@ export class WecomAppChannel extends BaseChannel {
     }
 
     const response = await fetch(
-      `https://wxapiproxy-latest-dhyi.onrender.com/cgi-bin/message/send?access_token=${tokenData.access_token}`,
+      `https://${baseUrl}/cgi-bin/message/send?access_token=${tokenData.access_token}`,
       {
         method: 'POST',
         headers: {

@@ -29,6 +29,7 @@ export interface SendMessageOptions {
   botToken?: string
   chatId?: string
   threadId?: string
+  apiBaseUrl?: string
   [key: string]: any
 }
 

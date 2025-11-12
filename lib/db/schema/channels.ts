@@ -15,6 +15,7 @@ export const channels = sqliteTable("channels", {
   botToken: text("bot_token"),
   chatId: text("chat_id"),
   threadId: text("thread_id"), // 用于存储 Telegram 话题 ID
+  apiBaseUrl: text("api_base_url"), // 用于存储自定义 API 地址（企业微信）
   status: text("status", { enum: ["active", "inactive"] }).notNull().default("active"),
   userId: text("user_id").notNull(),
   createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
@@ -34,6 +35,7 @@ export const insertChannelSchema = createInsertSchema(channels).extend({
   botToken: z.string().optional(),
   chatId: z.string().optional(),
   threadId: z.string().optional(),
+  apiBaseUrl: z.string().optional(),
 }).refine((data) => {
   if (data.type === CHANNEL_TYPES.WECOM_APP) {
     return !!data.corpId

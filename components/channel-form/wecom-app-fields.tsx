@@ -67,6 +67,22 @@ export function WecomAppFields({ form }: WecomAppFieldsProps) {
           </FormItem>
         )}
       />
+      <FormField
+        control={form.control}
+        name="apiBaseUrl"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>自定义API地址（可选）</FormLabel>
+            <FormControl>
+              <Input 
+                placeholder="留空使用官方地址，或填写自定义地址" 
+                {...field} 
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
     </>
   )
 } 

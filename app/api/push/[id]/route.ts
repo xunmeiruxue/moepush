@@ -50,6 +50,7 @@ export async function POST(
         botToken: endpoint.channel.botToken,
         chatId: endpoint.channel.chatId,
         threadId: endpoint.channel.threadId,
+        apiBaseUrl: endpoint.channel.apiBaseUrl,
       }
     )
 
