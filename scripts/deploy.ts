@@ -62,6 +62,21 @@ const createPagesSecret = () => {
         `AUTH_GITHUB_SECRET=${process.env.AUTH_GITHUB_SECRET}`,
         `DISABLE_REGISTER=${process.env.DISABLE_REGISTER}`,
     ];
+
+    // 添加可选的 OAuth 配置（用于 Authentik/Keycloak 等）
+    if (process.env.AUTH_OAUTH_ID) {
+        envVariables.push(`AUTH_OAUTH_ID=${process.env.AUTH_OAUTH_ID}`);
+    }
+    if (process.env.AUTH_OAUTH_SECRET) {
+        envVariables.push(`AUTH_OAUTH_SECRET=${process.env.AUTH_OAUTH_SECRET}`);
+    }
+    if (process.env.AUTH_OAUTH_ISSUER) {
+        envVariables.push(`AUTH_OAUTH_ISSUER=${process.env.AUTH_OAUTH_ISSUER}`);
+    }
+    if (process.env.AUTH_OAUTH_NAME) {
+        envVariables.push(`AUTH_OAUTH_NAME=${process.env.AUTH_OAUTH_NAME}`);
+    }
+
     fs.writeFileSync(envFilePath, envVariables.join('\n'));
     execSync(`wrangler pages secret bulk .env`);
 };
@@ -113,14 +128,14 @@ const createProject = async () => {
         }
 
         const data = await response.json() as { success: boolean, result: { name: string } };
-        
+
         if (!data.success) {
             throw new Error('Failed to create project');
         }
 
         // 等待项目创建完成
         await new Promise(resolve => setTimeout(resolve, 5000));
-        
+
         // 验证项目是否真正创建成功
         const verifyResponse = await fetch(
             `https://api.cloudflare.com/client/v4/accounts/${accountId}/pages/projects/${projectName}`,

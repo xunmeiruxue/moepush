@@ -8,9 +8,18 @@ import { Label } from "@/components/ui/label";
 import { Icons } from "@/components/icons";
 import { useToast } from "@/components/ui/use-toast";
 import { signIn } from "next-auth/react";
-import { GitHubButton } from "./github-button";
+import { OAuthButton } from "./oauth-button";
 
-export function LoginForm(props: React.HTMLAttributes<HTMLDivElement>) {
+interface LoginFormProps extends React.HTMLAttributes<HTMLDivElement> {
+  oauthProvider?: "github" | "oauth";
+  oauthProviderName?: string;
+}
+
+export function LoginForm({
+  oauthProvider = "github",
+  oauthProviderName = "OAuth",
+  ...props
+}: LoginFormProps) {
   const { toast } = useToast();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -49,6 +58,10 @@ export function LoginForm(props: React.HTMLAttributes<HTMLDivElement>) {
       setIsLoading(false);
     }
   }
+
+  const oauthText = oauthProvider === "oauth"
+    ? `${oauthProviderName} 登录`
+    : "GitHub 登录";
 
   return (
     <div className="grid gap-6" {...props}>
@@ -96,7 +109,7 @@ export function LoginForm(props: React.HTMLAttributes<HTMLDivElement>) {
           </span>
         </div>
       </div>
-      <GitHubButton text="GitHub 登录" />
+      <OAuthButton provider={oauthProvider} text={oauthText} />
     </div>
   );
-} 
+}

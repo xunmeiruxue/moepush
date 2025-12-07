@@ -2,6 +2,7 @@ import { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
 import { LoginForm } from "@/components/auth/login-form";
+import { oauthProvider, oauthProviderName } from "@/lib/auth-config";
 
 export const metadata: Metadata = {
   title: "登录 - MoePush",
@@ -39,7 +40,7 @@ export default function LoginPage() {
             </p>
           </div>
           <Suspense>
-            <LoginForm />
+            <LoginForm oauthProvider={oauthProvider} oauthProviderName={oauthProviderName} />
           </Suspense>
           <p className="px-8 text-center text-sm text-muted-foreground">
             还没有账号?{" "}
@@ -54,4 +55,4 @@ export default function LoginPage() {
       </div>
     </div>
   );
-} 
+}

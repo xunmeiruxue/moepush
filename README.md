@@ -25,6 +25,7 @@
 - 🎨**精美 UI** ：使用 shadcn/ui 组件库，提供精美 UI 设计。
 - 🚀**快速部署** ：基于 [Cloudflare Pages](https://pages.cloudflare.com/) 部署，免费且稳定。
 - 📦**接口组功能** ：支持创建接口组，一次性推送消息到多个渠道接口。
+- 🔐**灵活认证** ：支持 GitHub 登录，也支持 Authentik/Keycloak 等通用 OAuth2 认证。
 
 ## 已支持渠道
 
@@ -41,7 +42,7 @@
 - **框架**: [Next.js](https://nextjs.org/) (App Router)
 - **平台**: [Cloudflare Pages](https://pages.cloudflare.com/)
 - **数据库**: [Cloudflare D1](https://developers.cloudflare.com/d1/) (SQLite)
-- **认证**: [NextAuth](https://authjs.dev/getting-started/installation?framework=Next.js) 配合 GitHub 登录
+- **认证**: [NextAuth](https://authjs.dev/getting-started/installation?framework=Next.js) (支持 GitHub & 通用 OAuth)
 - **样式**: [Tailwind CSS](https://tailwindcss.com/)
 - **UI 组件**: 基于 [Radix UI](https://www.radix-ui.com/) 的自定义组件
 - **类型安全**: [TypeScript](https://www.typescriptlang.org/)
@@ -69,6 +70,13 @@ cp .env.example .env
 - `AUTH_GITHUB_ID`：GitHub OAuth App ID
 - `AUTH_GITHUB_SECRET`：GitHub OAuth App Secret
 - `DISABLE_REGISTER`：是否禁止注册，默认为`false`，设置为 `true` 则禁止注册
+
+**可选：配置通用 OAuth (Authentik/Keycloak 等)**
+如果配置了以下变量，将优先使用通用 OAuth 登录：
+- `AUTH_OAUTH_ID`：OAuth Client ID
+- `AUTH_OAUTH_SECRET`：OAuth Client Secret
+- `AUTH_OAUTH_ISSUER`：OAuth Issuer URL (例如 `https://authentik.example.com/application/o/moepush`)
+- `AUTH_OAUTH_NAME`：登录按钮显示的名称 (例如 `Authentik`, `SSO`)
 
 3. 创建 wrangler.json 文件
 ```bash
@@ -110,11 +118,23 @@ https://www.bilibili.com/video/BV1dtZBYnEUX/?p=2
 - `PROJECT_NAME`：项目名称 (可选，默认：moepush)
 - `DISABLE_REGISTER`：是否禁止注册，默认关闭，设置为 `true` 则禁止注册
 
+**可选：通用 OAuth 配置 (Authentik/Keycloak 等)**
+- `AUTH_OAUTH_ID`：OAuth Client ID
+- `AUTH_OAUTH_SECRET`：OAuth Client Secret
+- `AUTH_OAUTH_ISSUER`：OAuth Issuer URL
+- `AUTH_OAUTH_NAME`：登录按钮显示的名称 (例如 `Authentik`)
+
+> **注意**：配置通用 OAuth 后，回调 URL 为 `https://你的域名/api/auth/callback/oauth`
+
 ### 使用 Docker 部署
 
 ```bash
 docker pull beilunyang/moepush
-docker run -d -p 3000:3000 -v $(pwd)/.wrangler:/app/.wrangler -e AUTH_SECRET=<你的AUTH_SECRET> -e AUTH_GITHUB_ID=<你的AUTH_GITHUB_ID> -e AUTH_GITHUB_SECRET=<你的AUTH_GITHUB_SECRET> moepush
+docker run -d -p 3000:3000 -v $(pwd)/.wrangler:/app/.wrangler \
+  -e AUTH_SECRET=<你的AUTH_SECRET> \
+  -e AUTH_GITHUB_ID=<你的AUTH_GITHUB_ID> \
+  -e AUTH_GITHUB_SECRET=<你的AUTH_GITHUB_SECRET> \
+  moepush
 ```
 
 ## 贡献

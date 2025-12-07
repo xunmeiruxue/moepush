@@ -1,7 +1,8 @@
 import { Metadata } from "next";
 import Link from "next/link";
 import { RegisterForm } from "@/components/auth/register-form";
-import { GitHubButton } from "@/components/auth/github-button";
+import { OAuthButton } from "@/components/auth/oauth-button";
+import { oauthProvider, oauthProviderName } from "@/lib/auth-config";
 
 export const metadata: Metadata = {
   title: "注册 - MoePush",
@@ -9,6 +10,10 @@ export const metadata: Metadata = {
 };
 
 export default function RegisterPage() {
+  const oauthText = oauthProvider === "oauth"
+    ? `使用 ${oauthProviderName} 账号注册`
+    : "使用 GitHub 账号注册";
+
   return (
     <div className="container relative min-h-screen flex-col items-center justify-center grid lg:max-w-none lg:grid-cols-2 lg:px-0">
       <div className="relative hidden h-full flex-col bg-muted p-10 text-white lg:flex">
@@ -49,7 +54,7 @@ export default function RegisterPage() {
                 </span>
               </div>
             </div>
-            <GitHubButton />
+            <OAuthButton provider={oauthProvider} text={oauthText} />
             <p className="px-8 text-center text-sm text-muted-foreground">
               已有账号?{" "}
               <Link
@@ -64,4 +69,4 @@ export default function RegisterPage() {
       </div>
     </div>
   );
-} 
+}
