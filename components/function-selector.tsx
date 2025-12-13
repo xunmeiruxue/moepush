@@ -25,6 +25,16 @@ const FUNCTIONS = [
     ]
   },
   {
+    name: "formatDate",
+    description: "将日期转换为指定格式和时区（如北京时间）",
+    example: "${formatDate(body.date, 'YYYY-MM-DD HH:mm:ss', 8)}",
+    args: [
+      { name: "dateStr", description: "日期字符串，如 body.date" },
+      { name: "format", description: "时间格式，支持：YYYY(年)、MM(月)、DD(日)、HH(时)、mm(分)、ss(秒)，默认：YYYY-MM-DD HH:mm:ss" },
+      { name: "timezone", description: "时区设置，支持数字(如：8表示北京时间,-5表示西五区)或时区名(如：Asia/Shanghai)，可选" }
+    ]
+  },
+  {
     name: "now",
     description: "获取当前时间，支持自定义格式和时区",
     example: "${now('YYYY-MM-DD HH:mm:ss', 8)}",
@@ -43,12 +53,12 @@ export function FunctionSelector({ onSelect }: FunctionSelectorProps) {
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button 
-          variant="ghost" 
+        <Button
+          variant="ghost"
           size="sm"
           className="h-6 px-2 text-muted-foreground"
         >
-          <FunctionSquare className="h-4 w-4 mr-1" /> 
+          <FunctionSquare className="h-4 w-4 mr-1" />
           插入变量/函数
         </Button>
       </PopoverTrigger>
